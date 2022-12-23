@@ -1,66 +1,68 @@
-# syntax=docker/dockerfile:1
-
-FROM ghcr.io/linuxserver/baseimage-alpine-nginx:3.20
+FROM ghcr.io/pagdot/baseimage-ubuntu-nginx:noble
 
 # set version label
 ARG BUILD_DATE
 ARG VERSION
-ARG NEXTCLOUD_RELEASE
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="aptalca"
+ARG NEXTCLOUD_RELEASE=29.0.7
+LABEL build_version="pagdot version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="pagdot"
 
 # environment settings
-ENV LD_PRELOAD="/usr/lib/preloadable_libiconv.so"
+ENV NEXTCLOUD_PATH="/config/www/nextcloud"
 
 RUN \
   echo "**** install runtime packages ****" && \
-  apk add --no-cache \
+  apt update && \
+  apt install -y \
+    curl \
     ffmpeg \
-    gnu-libiconv \
     imagemagick \
-    imagemagick-heic \
-    imagemagick-pdf \
-    imagemagick-svg \
+    lbzip2 \
     libxml2 \
-    php83-apcu \
-    php83-bcmath \
-    php83-bz2 \
-    php83-dom \
-    php83-exif \
-    php83-ftp \
-    php83-gd \
-    php83-gmp \
-    php83-imap \
-    php83-intl \
-    php83-ldap \
-    php83-opcache \
-    php83-pcntl \
-    php83-pdo_mysql \
-    php83-pdo_pgsql \
-    php83-pdo_sqlite \
-    php83-pecl-imagick \
-    php83-pecl-mcrypt \
-    php83-pecl-memcached \
-    php83-pecl-smbclient \
-    php83-pgsql \
-    php83-posix \
-    php83-redis \
-    php83-sodium \
-    php83-sqlite3 \
-    php83-sysvsem \
-    php83-xmlreader \
+    php8.3-apcu \
+    php8.3-bcmath \
+    php8.3-bz2 \
+    php8.3-ctype \
+    php8.3-curl \
+    php8.3-dom \
+    php8.3-exif \
+    php8.3-fileinfo \
+    php8.3-ftp \
+    php8.3-gd \
+    php8.3-gmp \
+    php8.3-iconv \
+    php8.3-imagick \
+    php8.3-imap \
+    php8.3-intl \
+    php8.3-ldap \
+    php8.3-mysql \
+    php8.3-mbstring \
+    php8.3-opcache \
+    php8.3-pgsql \
+    php8.3-phar \
+    php8.3-posix \
+    php8.3-redis \
+    php8.3-simplexml \
+    php8.3-sqlite3 \
+    php8.3-xml \
+    php8.3-xmlreader \
+    php8.3-xmlwriter \
+    php8.3-zip \
     rsync \
     samba-client \
     util-linux \
     sudo && \
   echo "**** configure php-fpm to pass env vars ****" && \
-  sed -E -i 's/^;?clear_env ?=.*$/clear_env = no/g' /etc/php83/php-fpm.d/www.conf && \
-  grep -qxF 'clear_env = no' /etc/php83/php-fpm.d/www.conf || echo 'clear_env = no' >> /etc/php83/php-fpm.d/www.conf && \
-  echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /etc/php83/php-fpm.conf && \
+  sed -E -i 's/^;?clear_env ?=.*$/clear_env = no/g' /etc/php/8.3/fpm/pool.d/www.conf && \
+  grep -qxF 'clear_env = no' /etc/php/8.3/fpm/pool.d/www.conf || echo 'clear_env = no' >> /etc/php/8.3/fpm/pool.d/www.conf && \
+  echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /etc/php/8.3/fpm/php-fpm.conf && \
   echo "**** configure php for nextcloud ****" && \
   { \
     echo 'apc.enable_cli=1'; \
-  } >> /etc/php83/conf.d/apcu.ini && \
+  } >> /etc/php/8.3/fpm/conf.d/apcu.ini && \
+  { \
+    echo 'apc.enable_cli=1'; \
+  } >> /etc/php/8.3/cli/conf.d/apcu.ini && \
   { \
     echo 'opcache.enable=1'; \
     echo 'opcache.interned_strings_buffer=32'; \
@@ -70,7 +72,7 @@ RUN \
     echo 'opcache.revalidate_freq=60'; \
     echo 'opcache.jit=1255'; \
     echo 'opcache.jit_buffer_size=128M'; \
-  } >> "/etc/php83/conf.d/00_opcache.ini" && \
+  } >> "/etc/php/8.3/fpm/conf.d/91_opcache.ini" && \
   { \
     echo 'memory_limit=512M'; \
     echo 'upload_max_filesize=512M'; \
@@ -79,7 +81,7 @@ RUN \
     echo 'max_execution_time=300'; \
     echo 'output_buffering=0'; \
     echo 'always_populate_raw_post_data=-1'; \
-  } >> "/etc/php83/conf.d/nextcloud.ini" && \
+  } >> "/etc/php/8.3/fpm/conf.d/nextcloud.ini" && \
   echo "**** install nextcloud ****" && \
   mkdir -p \
     /app/www/src/ && \
@@ -98,7 +100,10 @@ RUN \
   chmod +x /app/www/src/occ && \
   printf "Linuxserver.io version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version && \
   echo "**** cleanup ****" && \
+  apt-get autoclean && \
   rm -rf \
+    /var/lib/apt/lists/* \
+    /var/tmp/* \
     /tmp/*
 
 # copy local files
