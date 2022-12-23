@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-alpine-nginx:arm64v8-3.15
+FROM ghcr.io/linuxserver/baseimage-ubuntu-nginx:jammy
 
 # set version label
 ARG BUILD_DATE
@@ -8,81 +8,65 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 LABEL maintainer="aptalca"
 
 # environment settings
-ENV NEXTCLOUD_PATH="/config/www/nextcloud" \
-  LD_PRELOAD="/usr/lib/preloadable_libiconv.so"
+ENV NEXTCLOUD_PATH="/config/www/nextcloud"
 
 RUN \
   echo "**** install runtime packages ****" && \
-  apk add --no-cache --upgrade \
+  apt update && \
+  apt install -y \
     curl \
     ffmpeg \
-    gnu-libiconv \
     imagemagick \
     libxml2 \
-    php8-apcu \
-    php8-bcmath \
-    php8-bz2 \
-    php8-ctype \
-    php8-curl \
-    php8-dom \
-    php8-exif \
-    php8-fileinfo \
-    php8-ftp \
-    php8-gd \
-    php8-gmp \
-    php8-iconv \
-    php8-imap \
-    php8-intl \
-    php8-ldap \
-    php8-mbstring \
-    php8-opcache \
-    php8-openssl \
-    php8-pcntl \
-    php8-pdo_mysql \
-    php8-pdo_pgsql \
-    php8-pdo_sqlite \
-    php8-pecl-imagick \
-    php8-pecl-mcrypt \
-    php8-pecl-memcached \
-    php8-pgsql \
-    php8-phar \
-    php8-posix \
-    php8-redis \
-    php8-session \
-    php8-simplexml \
-    php8-sodium \
-    php8-sqlite3 \
-    php8-xml \
-    php8-xmlreader \
-    php8-xmlwriter \
-    php8-zip \
+    php8.1-apcu \
+    php8.1-bcmath \
+    php8.1-bz2 \
+    php8.1-ctype \
+    php8.1-curl \
+    php8.1-dom \
+    php8.1-exif \
+    php8.1-fileinfo \
+    php8.1-ftp \
+    php8.1-gd \
+    php8.1-gmp \
+    php8.1-iconv \
+    php8.1-imagick \
+    php8.1-imap \
+    php8.1-intl \
+    php8.1-ldap \
+    php8.1-mbstring \
+    php8.1-opcache \
+    php8.1-pgsql \
+    php8.1-phar \
+    php8.1-posix \
+    php8.1-redis \
+    php8.1-simplexml \
+    php8.1-sqlite3 \
+    php8.1-xml \
+    php8.1-xmlreader \
+    php8.1-xmlwriter \
+    php8.1-zip \
     samba-client \
     sudo \
     tar \
     unzip && \
-  apk add --no-cache \
-    --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-    php8-pecl-smbclient && \
   echo "**** configure php and nginx for nextcloud ****" && \
-  echo 'apc.enable_cli=1' >> /etc/php8/conf.d/apcu.ini && \
+  echo 'apc.enable_cli=1' >> /etc/php/8.1/fpm/conf.d/apcu.ini && \
   sed -i \
     -e 's/;opcache.enable.*=.*/opcache.enable=1/g' \
+    -e 's/;opcache.enable_cli.*=.*/opcache.enable_cli=1/g' \
     -e 's/;opcache.interned_strings_buffer.*=.*/opcache.interned_strings_buffer=16/g' \
     -e 's/;opcache.max_accelerated_files.*=.*/opcache.max_accelerated_files=10000/g' \
     -e 's/;opcache.memory_consumption.*=.*/opcache.memory_consumption=128/g' \
     -e 's/;opcache.save_comments.*=.*/opcache.save_comments=1/g' \
     -e 's/;opcache.revalidate_freq.*=.*/opcache.revalidate_freq=1/g' \
-    -e 's/;always_populate_raw_post_data.*=.*/always_populate_raw_post_data=-1/g' \
     -e 's/memory_limit.*=.*128M/memory_limit=512M/g' \
     -e 's/max_execution_time.*=.*30/max_execution_time=120/g' \
     -e 's/upload_max_filesize.*=.*2M/upload_max_filesize=1024M/g' \
     -e 's/post_max_size.*=.*8M/post_max_size=1024M/g' \
     -e 's/output_buffering.*=.*/output_buffering=0/g' \
-      /etc/php8/php.ini && \
-  sed -i \
-    '/opcache.enable=1/a opcache.enable_cli=1' \
-      /etc/php8/php.ini && \
-  echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /etc/php8/php-fpm.conf && \
+      /etc/php/8.1/fpm/php.ini && \
+  echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /etc/php/8.1/fpm/php-fpm.conf && \
   echo "**** set version tag ****" && \
   if [ -z ${NEXTCLOUD_RELEASE+x} ]; then \
     NEXTCLOUD_RELEASE=$(curl -sX GET https://api.github.com/repos/nextcloud/server/releases/latest \
@@ -96,7 +80,10 @@ RUN \
     tar xvf /app/nextcloud.tar.bz2 -C \
       /tmp && \
   echo "**** cleanup ****" && \
+  apt-get autoclean && \
   rm -rf \
+    /var/lib/apt/lists/* \
+    /var/tmp/* \
     /tmp/*
 
 # copy local files
