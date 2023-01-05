@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile(\\..*)?$"],
+      "matchStrings": ["ARG NEXTCLOUD_RELEASE=(?<currentValue>.*?)\\n"],
+      "depNameTemplate": "nextcloud/server",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "packageNames": ["ghcr.io/pagdot/baseimage-ubuntu-nginx"],
+      "versioning": "ubuntu"
+    },
+    {
+      "packageNames": ["nextcloud/server"],
+      "extractVersion": "^v(?<version>.*)$",
+      "automerge": true
+    }
+  ]
+}
