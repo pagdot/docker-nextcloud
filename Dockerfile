@@ -34,6 +34,7 @@ RUN \
     php8.1-imap \
     php8.1-intl \
     php8.1-ldap \
+    php8.1-mysql \
     php8.1-mbstring \
     php8.1-opcache \
     php8.1-pgsql \
