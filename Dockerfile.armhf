@@ -53,6 +53,7 @@ RUN \
     unzip && \
   echo "**** configure php and nginx for nextcloud ****" && \
   echo 'apc.enable_cli=1' >> /etc/php/8.1/fpm/conf.d/apcu.ini && \
+  echo 'apc.enable_cli=1' >> /etc/php/8.1/cli/conf.d/apcu.ini && \
   sed -i \
     -e 's/;opcache.enable.*=.*/opcache.enable=1/g' \
     -e 's/;opcache.enable_cli.*=.*/opcache.enable_cli=1/g' \
@@ -68,6 +69,7 @@ RUN \
     -e 's/output_buffering.*=.*/output_buffering=0/g' \
       /etc/php/8.1/fpm/php.ini && \
   echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /etc/php/8.1/fpm/php-fpm.conf && \
+  echo "apc.enable_cli=1" >> /etc/php/8.1/cli/php.ini && \
   echo "**** set version tag ****" && \
   if [ -z ${NEXTCLOUD_RELEASE+x} ]; then \
     NEXTCLOUD_RELEASE=$(curl -sX GET https://api.github.com/repos/nextcloud/server/releases/latest \

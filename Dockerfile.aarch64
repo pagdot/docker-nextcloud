@@ -53,6 +53,7 @@ RUN \
     unzip && \
   echo "**** configure php and nginx for nextcloud ****" && \
   echo 'apc.enable_cli=1' >> /etc/php/8.1/fpm/conf.d/apcu.ini && \
+  echo 'apc.enable_cli=1' >> /etc/php/8.1/cli/conf.d/apcu.ini && \
   sed -i \
     -e 's/;opcache.enable.*=.*/opcache.enable=1/g' \
     -e 's/;opcache.enable_cli.*=.*/opcache.enable_cli=1/g' \
