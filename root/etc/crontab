@@ -22,4 +22,4 @@ SHELL=/bin/sh
 52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #
 # nextcloud cron
-60 */5  * * *   root    s6-setuidgid abc php -f /config/www/nextcloud/cron.php
+*/5 *   * * *   root    s6-setuidgid abc php -f /config/www/nextcloud/cron.php
