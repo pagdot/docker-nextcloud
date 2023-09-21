@@ -3,7 +3,7 @@ FROM ghcr.io/pagdot/baseimage-ubuntu-nginx:jammy
 # set version label
 ARG BUILD_DATE
 ARG VERSION
-ARG NEXTCLOUD_RELEASE=27.1.0
+ARG NEXTCLOUD_RELEASE=27.1.1
 LABEL build_version="pagdot version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="pagdot"
 
