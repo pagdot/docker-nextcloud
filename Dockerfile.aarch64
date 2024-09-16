@@ -1,4 +1,4 @@
-FROM ghcr.io/pagdot/baseimage-ubuntu-nginx:jammy
+FROM ghcr.io/pagdot/baseimage-ubuntu-nginx:noble
 
 # set version label
 ARG BUILD_DATE
