@@ -3,7 +3,7 @@ FROM ghcr.io/pagdot/baseimage-ubuntu-nginx:noble
 # set version label
 ARG BUILD_DATE
 ARG VERSION
-ARG NEXTCLOUD_RELEASE=31.0.5
+ARG NEXTCLOUD_RELEASE=31.0.7
 LABEL build_version="pagdot version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="pagdot"
 
